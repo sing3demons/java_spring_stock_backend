@@ -3,6 +3,7 @@ package com.sing3demons.stock_backend.controller;
 import com.sing3demons.stock_backend.exception.ProductNotFoundException;
 import com.sing3demons.stock_backend.exception.ValidationException;
 import com.sing3demons.stock_backend.models.Product;
+import com.sing3demons.stock_backend.repository.ProductRepository;
 import com.sing3demons.stock_backend.request.ProductRequest;
 import com.sing3demons.stock_backend.service.StorageService;
 import lombok.extern.slf4j.Slf4j;
@@ -25,21 +26,23 @@ public class ProductController {
 
     private final List<Product> productList = new ArrayList<>();
     private final StorageService storageService;
+    private final ProductRepository productRepository;
 
-    ProductController(StorageService storageService) {
+    ProductController(StorageService storageService, ProductRepository productRepository) {
         this.storageService = storageService;
+        this.productRepository = productRepository;
     }
 
     @GetMapping("")
     @ResponseStatus(HttpStatus.OK)
     public List<Product> getProducts() {
-        return productList;
+        return productRepository.findAll();
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Product getProduct(@PathVariable(name = "id") long id) {
-        return productList.stream().filter(p -> p.getId() == id).findFirst().orElseThrow(() -> new ProductNotFoundException(id));
+        return productRepository.findById(id).stream().filter(p -> p.getId() == id).findFirst().orElseThrow(() -> new ProductNotFoundException(id));
     }
 
     @GetMapping("/search")
@@ -57,29 +60,34 @@ public class ProductController {
             });
         }
         String fileName = storageService.store(productRequest.getImage());
-        Product data = new Product(counter.incrementAndGet(), productRequest.getName(), fileName, productRequest.getPrice(), productRequest.getStock());
-        productList.add(data);
-        return data;
+
+        Product data = new Product();
+        data.setName(productRequest.getName());
+        data.setImage(fileName);
+        data.setPrice(productRequest.getPrice());
+        data.setStock(productRequest.getStock());
+
+        return productRepository.save(data);
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void update(@RequestBody Product product, @PathVariable("id") long id) {
-        Product data;
-        productList.stream().filter(p -> p.getId() == id).findFirst().ifPresentOrElse(r -> {
+        productRepository.findById(id).stream().filter(p -> p.getId() == id).findFirst().ifPresentOrElse(r -> {
             r.setName(product.getName());
             r.setImage(product.getImage());
             r.setPrice(product.getPrice());
             r.setStock(product.getStock());
+            productRepository.save(r);
         }, () -> {
-            //TODO
+            throw new ProductNotFoundException(id);
         });
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("id") long id) {
-        productList.stream().filter(p -> p.getId() == id).findFirst().ifPresentOrElse(productList::remove, () -> {
+        productRepository.findById(id).stream().filter(p -> p.getId() == id).findFirst().ifPresentOrElse(productRepository::delete, () -> {
             throw new ProductNotFoundException(id);
         });
     }
