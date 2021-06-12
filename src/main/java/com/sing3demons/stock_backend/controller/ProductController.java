@@ -23,33 +23,33 @@ public class ProductController {
 
     private final AtomicLong counter = new AtomicLong();
 
-    private List<Product> productList = new ArrayList<>();
-    private StorageService storageService;
+    private final List<Product> productList = new ArrayList<>();
+    private final StorageService storageService;
 
     ProductController(StorageService storageService) {
         this.storageService = storageService;
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping("")
+    @ResponseStatus(HttpStatus.OK)
     public List<Product> getProducts() {
         return productList;
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public Product getProduct(@PathVariable(name = "id") long id) {
         return productList.stream().filter(p -> p.getId() == id).findFirst().orElseThrow(() -> new ProductNotFoundException(id));
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/search")
+    @ResponseStatus(HttpStatus.OK)
     public String getProduct(@RequestParam(name = "name") String name) {
         return "search " + name;
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
+    @ResponseStatus(HttpStatus.CREATED)
     public Product createProducts(@Valid ProductRequest productRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             bindingResult.getFieldErrors().forEach(fieldError -> {
@@ -62,8 +62,8 @@ public class ProductController {
         return data;
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public void update(@RequestBody Product product, @PathVariable("id") long id) {
         Product data;
         productList.stream().filter(p -> p.getId() == id).findFirst().ifPresentOrElse(r -> {
@@ -76,12 +76,10 @@ public class ProductController {
         });
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("id") long id) {
-        productList.stream().filter(p -> p.getId() == id).findFirst().ifPresentOrElse(r -> {
-            productList.remove(r);
-        }, () -> {
+        productList.stream().filter(p -> p.getId() == id).findFirst().ifPresentOrElse(productList::remove, () -> {
             throw new ProductNotFoundException(id);
         });
     }
