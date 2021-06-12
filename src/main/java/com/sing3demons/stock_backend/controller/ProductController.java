@@ -5,6 +5,7 @@ import com.sing3demons.stock_backend.exception.ValidationException;
 import com.sing3demons.stock_backend.models.Product;
 import com.sing3demons.stock_backend.request.ProductRequest;
 import com.sing3demons.stock_backend.service.StorageService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +18,11 @@ import java.util.concurrent.atomic.AtomicLong;
 //@CrossOrigin
 @RestController
 @RequestMapping("api/v1/products")
+@Slf4j
 public class ProductController {
 
     private final AtomicLong counter = new AtomicLong();
+
     private List<Product> productList = new ArrayList<>();
     private StorageService storageService;
 
