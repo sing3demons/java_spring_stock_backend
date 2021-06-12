@@ -2,8 +2,12 @@ package com.sing3demons.stock_backend.controller;
 
 import com.sing3demons.stock_backend.exception.ProductNotFoundException;
 import com.sing3demons.stock_backend.models.Product;
+import com.sing3demons.stock_backend.request.ProductRequest;
+import com.sing3demons.stock_backend.service.StorageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -14,6 +18,11 @@ public class ProductController {
 
     private final AtomicLong counter = new AtomicLong();
     private List<Product> productList = new ArrayList<>();
+    private StorageService storageService;
+
+    ProductController(StorageService storageService) {
+        this.storageService = storageService;
+    }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("")
@@ -35,8 +44,10 @@ public class ProductController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
-    public Product createProducts(@RequestBody Product product) {
-        Product data = new Product(counter.incrementAndGet(), product.getName(), product.getImage(), product.getPrice(), product.getStock());
+    public Product createProducts(ProductRequest productRequest) {
+        String fileName = storageService.store(productRequest.getImage());
+        System.out.printf("upload: "+fileName);
+        Product data = new Product(counter.incrementAndGet(), productRequest.getName(), fileName, productRequest.getPrice(), productRequest.getStock());
         productList.add(data);
         return data;
     }
