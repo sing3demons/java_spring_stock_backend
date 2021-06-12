@@ -15,9 +15,7 @@ public class StockBackendApplication {
 
     @Bean
     CommandLineRunner init(StorageService storageservice){
-        return args-> {
-            storageservice.init();
-        };
+        return args-> storageservice.init();
     }
 
 }

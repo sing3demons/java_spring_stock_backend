@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+//@CrossOrigin
 @RestController
 @RequestMapping("api/v1/products")
 public class ProductController {
