@@ -1,8 +1,8 @@
 package com.sing3demons.stock_backend.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 public class ExceptionAdvice {
@@ -15,7 +15,19 @@ public class ExceptionAdvice {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    String handlerStorageException(StorageException ex){
+    String handlerStorageException(StorageException ex) {
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    String handlerMaxUploadSize(MaxUploadSizeExceededException ex) {
+        return "Maximum upload size exceeded";
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    String handlerValidation(ValidationException ex) {
         return ex.getMessage();
     }
 }

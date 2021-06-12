@@ -1,13 +1,15 @@
 package com.sing3demons.stock_backend.controller;
 
 import com.sing3demons.stock_backend.exception.ProductNotFoundException;
+import com.sing3demons.stock_backend.exception.ValidationException;
 import com.sing3demons.stock_backend.models.Product;
 import com.sing3demons.stock_backend.request.ProductRequest;
 import com.sing3demons.stock_backend.service.StorageService;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -44,9 +46,13 @@ public class ProductController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
-    public Product createProducts(ProductRequest productRequest) {
+    public Product createProducts(@Valid ProductRequest productRequest, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            bindingResult.getFieldErrors().forEach(fieldError -> {
+                throw new ValidationException(fieldError.getField() + ": " + fieldError.getDefaultMessage());
+            });
+        }
         String fileName = storageService.store(productRequest.getImage());
-        System.out.printf("upload: "+fileName);
         Product data = new Product(counter.incrementAndGet(), productRequest.getName(), fileName, productRequest.getPrice(), productRequest.getStock());
         productList.add(data);
         return data;
