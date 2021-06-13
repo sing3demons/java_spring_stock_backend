@@ -27,6 +27,7 @@ public class Product {
     private String image;
     private int price;
     private int stock;
+
     @Setter(AccessLevel.NONE)
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
