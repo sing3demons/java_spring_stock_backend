@@ -4,9 +4,13 @@ import com.sing3demons.stock_backend.exception.ProductNotFoundException;
 import com.sing3demons.stock_backend.models.Product;
 import com.sing3demons.stock_backend.repository.ProductRepository;
 import com.sing3demons.stock_backend.request.ProductRequest;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +20,9 @@ import java.util.regex.PatternSyntaxException;
 public class ProductServiceImp implements ProductService {
     private final StorageService storageService;
     private final ProductRepository productRepository;
+
+    @Value("${app.upload.path:images}")
+    private String path;
 
     public ProductServiceImp(StorageService storageService, ProductRepository productRepository) {
         this.storageService = storageService;
@@ -44,7 +51,7 @@ public class ProductServiceImp implements ProductService {
     @Override
     public Product createProduct(ProductRequest productRequest) {
         String fileName = storageService.store(productRequest.getImage());
-
+        System.out.println("fileName: " + fileName);
         Product data = new Product();
         data.setName(productRequest.getName());
         data.setImage(fileName);
@@ -78,7 +85,20 @@ public class ProductServiceImp implements ProductService {
     public void deleteProduct(long id) throws ProductNotFoundException {
         Optional<Product> product = productRepository.findById(id);
         if (product.isPresent()) {
+            Path pathTwo = Paths.get(path+"/"+product.get().getImage());
+            try {
+                // Delete file or directory
+                Files.delete(pathTwo);
+                System.out.println("File or directory deleted successfully");
+            } catch (NoSuchFileException ex) {
+                System.out.printf("No such file or directory: %s\n", path);
+            } catch (DirectoryNotEmptyException ex) {
+                System.out.printf("Directory %s is not empty\n", path);
+            } catch (IOException ex) {
+                System.out.println(ex);
+            }
             productRepository.deleteById(id);
+
         } else {
             throw new ProductNotFoundException(id);
         }
@@ -106,6 +126,6 @@ public class ProductServiceImp implements ProductService {
 
     @Override
     public List<Product> findByNameAndPrice(String name, int price) {
-        return productRepository.searchNameAndPrice(name,price);
+        return productRepository.searchNameAndPrice(name, price);
     }
 }
