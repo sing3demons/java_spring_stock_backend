@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
 import javax.validation.Valid;
 import java.util.List;
 
@@ -36,11 +37,6 @@ public class ProductController {
         return productService.findProductById(id);
     }
 
-    @GetMapping("/search")
-    @ResponseStatus(HttpStatus.OK)
-    public String getProduct(@RequestParam(name = "name") String name) {
-        return "search " + name;
-    }
 
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
@@ -68,5 +64,28 @@ public class ProductController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("id") long id) {
         productService.deleteProduct(id);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/search", params = "name")
+    public Product getProduct(@RequestParam(name = "name") String name) {
+        return productService.findByProductName(name);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/search", params = {"name", "stock"})
+    public List<Product> searchProductNameAndStock(@RequestParam String name, @RequestParam() int stock) {
+        return productService.findByProductNameAndStock(name, stock);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/search", params = {"name", "price"})
+    public List<Product> searchProductNameAndPrice(@RequestParam String name, @RequestParam() int price) {
+        return productService.findByNameAndPrice(name,price);
+    }
+
+    @GetMapping("out-of-stock")
+    public List<Product> checkOutOfStock() {
+        return productService.findByProductOutOfStock();
     }
 }

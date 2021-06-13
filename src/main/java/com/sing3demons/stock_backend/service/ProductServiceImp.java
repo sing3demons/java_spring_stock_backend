@@ -4,10 +4,13 @@ import com.sing3demons.stock_backend.exception.ProductNotFoundException;
 import com.sing3demons.stock_backend.models.Product;
 import com.sing3demons.stock_backend.repository.ProductRepository;
 import com.sing3demons.stock_backend.request.ProductRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.PatternSyntaxException;
 
 @Service
 public class ProductServiceImp implements ProductService {
@@ -21,11 +24,15 @@ public class ProductServiceImp implements ProductService {
 
     @Override
     public List<Product> findProduct() {
-        return productRepository.findAll();
+        List<Product> products = productRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+        if (products.isEmpty()) {
+            return new ArrayList<Product>();
+        }
+        return products;
     }
 
     @Override
-    public Product findProductById(long id) {
+    public Product findProductById(long id) throws PatternSyntaxException {
         Optional<Product> product = productRepository.findById(id);
         if (product.isPresent()) {
             return product.get();
@@ -68,11 +75,37 @@ public class ProductServiceImp implements ProductService {
     }
 
     @Override
-    public void deleteProduct(long id) {
-        try {
+    public void deleteProduct(long id) throws ProductNotFoundException {
+        Optional<Product> product = productRepository.findById(id);
+        if (product.isPresent()) {
             productRepository.deleteById(id);
-        } catch (Exception e) {
+        } else {
             throw new ProductNotFoundException(id);
         }
+    }
+
+    @Override
+    public Product findByProductName(String name) throws ProductNotFoundException {
+        Optional<Product> product = productRepository.findTopByName(name);
+        if (product.isPresent()) {
+            return product.get();
+        }
+        throw new ProductNotFoundException(name);
+    }
+
+    @Override
+    public List<Product> findByProductNameAndStock(String name, int stock) {
+        Optional<List<Product>> product = Optional.ofNullable(productRepository.findByNameContainingAndStockGreaterThanEqualOrderByStockDesc(name, stock));
+        return product.orElse(null);
+    }
+
+    @Override
+    public List<Product> findByProductOutOfStock() {
+        return productRepository.checkOutOfStock();
+    }
+
+    @Override
+    public List<Product> findByNameAndPrice(String name, int price) {
+        return productRepository.searchNameAndPrice(name,price);
     }
 }
