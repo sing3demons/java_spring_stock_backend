@@ -5,6 +5,7 @@ target/
 !**/src/test/**/target/
 images
 logs
+.env
 
 ### STS ###
 .apt_generated

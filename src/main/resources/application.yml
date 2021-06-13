@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 app:
   upload:
@@ -20,9 +20,9 @@ spring:
 spring:
   profiles: dev
   datasource:
-    url: jdbc:postgresql://john.db.elephantsql.com/tqadwmie
-    username: tqadwmie
-    password: mVfJ2TQxI1taRhTCWfgF_F8wZCfiYcXc
+    url: ${SERVER_URL}
+    username: ${SERVER_USERNAME}
+    password: ${SERVER_PASSWORD}
   jpa:
     properties:
       hibernate:
@@ -53,11 +53,11 @@ spring:
 spring:
   profiles: prod
   datasource:
-    url: jdbc:postgresql://john.db.elephantsql.com/tqadwmie
-    username: tqadwmie
-    password: mVfJ2TQxI1taRhTCWfgF_F8wZCfiYcXc
+    url: ${SERVER_URL}
+    username: ${SERVER_USERNAME}
+    password: ${SERVER_PASSWORD}
   jpa:
     hibernate.ddl-auto: update
 
 server:
-  port: 8080
+  port: ${PORT}
