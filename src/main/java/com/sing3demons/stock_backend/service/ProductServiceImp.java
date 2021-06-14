@@ -4,7 +4,6 @@ import com.sing3demons.stock_backend.exception.ProductNotFoundException;
 import com.sing3demons.stock_backend.models.Product;
 import com.sing3demons.stock_backend.repository.ProductRepository;
 import com.sing3demons.stock_backend.request.ProductRequest;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -14,7 +13,6 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.PatternSyntaxException;
 
 @Service
 public class ProductServiceImp implements ProductService {
@@ -39,7 +37,7 @@ public class ProductServiceImp implements ProductService {
     }
 
     @Override
-    public Product findProductById(long id) throws PatternSyntaxException {
+    public Product findProductById(long id) throws ProductNotFoundException {
         Optional<Product> product = productRepository.findById(id);
         if (product.isPresent()) {
             return product.get();
@@ -49,7 +47,7 @@ public class ProductServiceImp implements ProductService {
     }
 
     @Override
-    public Product createProduct(ProductRequest productRequest) {
+    public void createProduct(ProductRequest productRequest) {
         String fileName = storageService.store(productRequest.getImage());
         System.out.println("fileName: " + fileName);
         Product data = new Product();
@@ -58,11 +56,11 @@ public class ProductServiceImp implements ProductService {
         data.setPrice(productRequest.getPrice());
         data.setStock(productRequest.getStock());
 
-        return productRepository.save(data);
+        productRepository.save(data);
     }
 
     @Override
-    public Product updateProduct(ProductRequest productRequest, long id) {
+    public void updateProduct(ProductRequest productRequest, long id) {
         String fileName = storageService.store(productRequest.getImage());
         Optional<Product> product = productRepository.findById(id);
         if (product.isEmpty()) {
@@ -77,7 +75,7 @@ public class ProductServiceImp implements ProductService {
         product.get().setImage(fileName);
         product.get().setPrice(productRequest.getPrice());
         product.get().setStock(productRequest.getStock());
-        return productRepository.save(product.get());
+        productRepository.save(product.get());
 
     }
 
