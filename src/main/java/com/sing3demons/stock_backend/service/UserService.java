@@ -5,4 +5,5 @@ import com.sing3demons.stock_backend.request.UserRequest;
 
 public interface UserService {
     User register(UserRequest userRequest);
+    User findUserByEmail(String email);
 }

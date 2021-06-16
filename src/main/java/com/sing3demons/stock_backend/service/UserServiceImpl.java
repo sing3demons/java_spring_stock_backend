@@ -7,6 +7,8 @@ import com.sing3demons.stock_backend.request.UserRequest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository _userRepository;
@@ -14,7 +16,7 @@ public class UserServiceImpl implements UserService {
 
     UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this._userRepository = userRepository;
-        this.bCryptPasswordEncoder=bCryptPasswordEncoder;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     @Override
@@ -28,5 +30,11 @@ public class UserServiceImpl implements UserService {
             return _userRepository.save(result);
         }
         throw new UserException(userRequest.getEmail());
+    }
+
+    @Override
+    public User findUserByEmail(String email) {
+        Optional<User> user = Optional.ofNullable(_userRepository.findByEmail(email));
+        return user.orElse(null);
     }
 }
