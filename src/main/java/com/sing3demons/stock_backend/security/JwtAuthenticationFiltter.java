@@ -23,15 +23,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 
+
 public class JwtAuthenticationFiltter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
 
     @Value("${app.key.token}")
-    private String token;
+    private String JWT_SECRET;
 
     public JwtAuthenticationFiltter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
-        this.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/api/v1/auth/login", HttpMethod.POST.name()));
+        this.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(SecurityConstants.SIGN_in_URL, HttpMethod.POST.name()));
     }
 
 
@@ -64,13 +65,13 @@ public class JwtAuthenticationFiltter extends UsernamePasswordAuthenticationFilt
 
                 OutputStream outputStream = response.getOutputStream();
                 ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.writerWithDefaultPrettyPrinter().writeValue(outputStream,respJson);
+                objectMapper.writerWithDefaultPrettyPrinter().writeValue(outputStream, respJson);
                 outputStream.flush();
             }
         }
     }
 
     private String createToken(Claims claims) {
-        return Jwts.builder().setClaims(claims).setExpiration(new Date(System.currentTimeMillis())).signWith(SignatureAlgorithm.HS256, token).compact();
+        return Jwts.builder().setClaims(claims).setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME)).signWith(SignatureAlgorithm.HS256, JWT_SECRET).compact();
     }
 }

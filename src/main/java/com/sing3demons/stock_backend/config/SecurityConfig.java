@@ -1,6 +1,7 @@
 package com.sing3demons.stock_backend.config;
 
 import com.sing3demons.stock_backend.security.JwtAuthenticationFiltter;
+import com.sing3demons.stock_backend.security.JwtAuthorizationFiltter;
 import com.sing3demons.stock_backend.security.UserDetailService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
@@ -36,8 +37,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.DELETE, "/products/*").hasAnyAuthority("Admin").anyRequest().authenticated()
                 .and().exceptionHandling().authenticationEntryPoint((req, res, err) -> {
             res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-        }).and().addFilter(authenticationFilter())
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        })
+                .and().addFilter(authenticationFilter()).sessionManagement()
+                .and().addFilter(new JwtAuthorizationFiltter(authenticationManager()))
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
 
     @Bean
